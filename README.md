@@ -10,6 +10,8 @@
 
 `npm install`
 
+`npm start`
+
 `cat config.json`
 
 
