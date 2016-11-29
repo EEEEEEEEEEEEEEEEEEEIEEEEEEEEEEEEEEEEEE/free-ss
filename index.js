@@ -13,7 +13,7 @@ function GetAccount(){
 			.then(parseJSON)
 			.then(function(data){
 				var node = null;
-				var prefix = 'netspeed":"';
+				var speedRegExp = /\"netspeed\":\"(\d+\.\d+)_([A-Z]{1,2})\/s\"/;
 
 				for (var i = 0; i < data.length; i++) {
 					var temp = data[i];
@@ -23,8 +23,19 @@ function GetAccount(){
 					if(node == null) {
 						node = temp;
 					} else {
-						var speed = parseFloat(node.l.substring(node.l.indexOf(prefix) + prefix.length, node.l.length - 7));
-						var _speed = parseFloat(temp.l.substring(temp.l.indexOf(prefix) + prefix.length, temp.l.length - 7));
+						// 正则获取速度与单位
+						var _nodeResult = node.l.match(speedRegExp);
+						var _tempResult = temp.l.match(speedRegExp);
+						var speed = parseFloat(_nodeResult[1]);
+						var unit = _nodeResult[2];
+						var _speed = parseFloat(_tempResult[1]);
+						var _unit = _tempResult[2];
+						// 统一单位
+						if(unit != _unit){
+							speed = UnitFormat2MB(speed, unit);
+							_speed = UnitFormat2MB(speed, _unit);
+						}
+
 						if(_speed > speed){
 							node = temp;
 						}
@@ -61,6 +72,18 @@ function WriteConfigToLocal(config){
 			resolve(cfg);
 		});
 	});
+}
+
+function UnitFormat2MB(size, unit){
+	switch(unit.toUpperCase()){
+		case "KB":
+			size = size / 1024;
+			break;
+		case "B":
+			size = size / (1024*2);
+			break;
+	}
+	return size;
 }
 
 GetAccount().then(function(dto){
