@@ -7,7 +7,9 @@ function parseJSON(response) {
   return response.json()
 }
 
-function GetAccount(){
+
+function GetAccount1(){
+	console.log('正在尝试拉取mianvpn免费账户信息');
 	return new Promise(function(resolve, reject){
 		fetch("https://api.mianvpn.com/ajax.php?verify=true&mod=getfreess&t=" + new Date().getTime())
 			.then(parseJSON)
@@ -41,16 +43,53 @@ function GetAccount(){
 						}
 					}
 				}
-				if(node == null){
-					reject(new Error("无可用节点"));
-				} else {
-					resolve(node);
-				}
+				resolve(node);
 			})
 			.catch(function(err){
 				console.log('请求失败：', err);
-				reject(err);
+				resolve(null);
 			});
+	});
+}
+
+function GetAccount2(){
+	console.log('正在尝试拉取ishadowsocks免费账户信息');
+	var regx = /服务器地址:([\w.]+)<\/h4>\s+<h4>端口:(\d+)<\/h4>\s+<h4>\w+密码:(\d+)<\/h4>\s+<h4>加密方式:([\w-]+)<\/h4>\s+<h4>状态:<font color="green">正常<\/font><\/h4>/;
+	return new Promise(function(resolve, reject){
+		fetch("https://www.ishadowsocks.biz/")
+			.then(function(res) {
+				return res.text();
+			})
+			.then(function(text) {
+				var arr = text.match(regx);
+				var node = {
+					i: arr[1], // ip
+					p: arr[2], // port
+					pw: arr[3], // password
+					m: arr[4] // method
+				};
+				resolve(node);
+			})
+			.catch(function(err){
+				console.log('请求失败2：', err);
+				resolve(null);
+			});
+	});
+}
+
+function GetAccount(){
+	return GetAccount1().then(function(node) {
+		if(node == null) {
+			return GetAccount2();
+		} else {
+			return node;
+		}
+	}).then(function(node) {
+		if(node == null){
+			Promise.reject(new Error("无可用节点"));
+		} else {
+			return node;
+		}
 	});
 }
 

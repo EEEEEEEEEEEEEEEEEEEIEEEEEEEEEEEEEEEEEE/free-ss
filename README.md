@@ -24,6 +24,7 @@
 
 ## 感谢以下网址提供免费账户信息
  - [https://www.mianvpn.com/](https://www.mianvpn.com/)
+ - [https://www.ishadowsocks.biz/](https://www.ishadowsocks.biz/)
 
  > 免费账户不能保证你的上网隐私，请尽量购买付费服务或自行搭建SS
 
