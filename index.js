@@ -7,11 +7,12 @@ function parseJSON(response) {
   return response.json()
 }
 
-
 function GetAccount1(){
 	console.log('正在尝试拉取mianvpn免费账户信息');
 	return new Promise(function(resolve, reject){
-		fetch("https://api.mianvpn.com/ajax.php?verify=true&mod=getfreess&t=" + new Date().getTime())
+		fetch("https://api.mianvpn.com/ajax.php?verify=true&mod=getfreess&t=" + new Date().getTime(), {
+			timeout: 3000
+		})
 			.then(parseJSON)
 			.then(function(data){
 				var node = null;
@@ -56,7 +57,9 @@ function GetAccount2(){
 	console.log('正在尝试拉取ishadowsocks免费账户信息');
 	var regx = /服务器地址:([\w.]+)<\/h4>\s+<h4>端口:(\d+)<\/h4>\s+<h4>\w+密码:(\d+)<\/h4>\s+<h4>加密方式:([\w-]+)<\/h4>\s+<h4>状态:<font color="green">正常<\/font><\/h4>/;
 	return new Promise(function(resolve, reject){
-		fetch("https://www.ishadowsocks.biz/")
+		fetch("https://www.ishadowsocks.biz/", {
+			timeout: 3000
+		})
 			.then(function(res) {
 				return res.text();
 			})
@@ -77,10 +80,43 @@ function GetAccount2(){
 	});
 }
 
+function GetAccount3(){
+	console.log('正在尝试拉取freevpnss.cc免费账户信息');
+	var regx = /<div class=\"panel-body\">\s+<p>服务器地址：([\w.]+)<\/p>\s+<p>端口：(\d+)<\/p>\s+<p>密<span class=\"hidden\">[def]<\/span>码：([\w\d]+)<\/p>\s+<p>加密方式：([\w-]+)<\/p>\s+<p><span class=\"label label-success\">Active<\/span><\/p>/;
+	return new Promise(function(resolve, reject){
+		fetch("https://freevpnss.cc", {
+			timeout: 3000
+		})
+			.then(function(res) {
+				return res.text();
+			})
+			.then(function(text) {
+				var arr = text.match(regx);
+				var node = {
+					i: arr[1], // ip
+					p: arr[2], // port
+					pw: arr[3], // password
+					m: arr[4] // method
+				};
+				resolve(node);
+			})
+			.catch(function(err){
+				console.log('请求失败3：', err);
+				resolve(null);
+			});
+	});
+}
+
 function GetAccount(){
 	return GetAccount1().then(function(node) {
 		if(node == null) {
 			return GetAccount2();
+		} else {
+			return node;
+		}
+	}).then(function(node) {
+		if(node == null) {
+			return GetAccount3();
 		} else {
 			return node;
 		}
